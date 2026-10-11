@@ -305,7 +305,7 @@ class LegRestMechanism:
         Y_results = np.stack([p1y, p2y, p3y, p4y, p5y, p6y, p7y], axis = 1)
 
         all_points = np.stack([X_results, Y_results], axis = 2)
-        print(all_points.shape)
+        #print(all_points.shape)
 
         return interval_angles, all_points
         
