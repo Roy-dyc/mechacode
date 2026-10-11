@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+mechacode.egg-info/PKG-INFO
+mechacode.egg-info/SOURCES.txt
+mechacode.egg-info/dependency_links.txt
+mechacode.egg-info/requires.txt
+mechacode.egg-info/top_level.txt
+src/mechacode/__init__.py
+src/mechacode/animation.py
+src/mechacode/app_main.py
+src/mechacode/mechanism.py
+src/mechacode/plotly_mechanism.py
+src/mechacode/results.py
+src/mechacode/solve.py

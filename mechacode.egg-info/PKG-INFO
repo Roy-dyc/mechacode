@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: mechacode
+Version: 0.1.0
+Summary: Help to optimize the mechanism
+Author: DYC
+License-Expression: MIT
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: pymoo>=0.6.2
+Requires-Dist: numpy>=1.26.4
+Requires-Dist: matplotlib>=3.9.2
+Requires-Dist: scipy>=1.13.1
+Provides-Extra: dev
+Requires-Dist: pytest>=7; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
