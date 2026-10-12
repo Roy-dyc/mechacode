@@ -34,7 +34,7 @@ page = st.sidebar.radio(
 # 工具函数
 # ============================================================
 
-def save_result_to_json(result, problem, filename='data/result.json'):
+def save_result_to_json(result, problem, target_lines, filename='data/result.json'):
     """保存 pymoo 结果到 JSON"""
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     
@@ -46,6 +46,7 @@ def save_result_to_json(result, problem, filename='data/result.json'):
             'n_obj': problem.n_obj,
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         },
+        "target_lines": target_lines.tolist(),
         'X': result.X.tolist(),
         'F': result.F.tolist(),
     }
@@ -62,15 +63,16 @@ def save_result_to_json(result, problem, filename='data/result.json'):
 def load_result_from_json(filename='data/result.json'):
     """从 JSON 加载结果"""
     if not os.path.exists(filename):
-        return None, None, None
+        return None, None, None, None
     
     with open(filename, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     X = np.array(data['X'])
     F = np.array(data['F'])
+    target_lines = np.array(data["target_lines"])
     
-    return X, F, data
+    return X, F, target_lines, data
 
 
 def create_pareto_chart(F, selected_idx=None):
@@ -159,7 +161,7 @@ if page == "🚀 Optimization":
             for _, row in edited_df.iterrows()
         ])
 
-        print(target_lines)
+        #print(target_lines.tolist())
 
         st.divider()
         
@@ -180,10 +182,6 @@ if page == "🚀 Optimization":
         # 转换为 area_size 格式
         area_size = edited_area_df["Value"].tolist()
         
-        #print(area_size)
-
-        #print(target_lines)
-
         st.divider()
 
         # ✅ 优化按钮
@@ -218,7 +216,7 @@ if page == "🚀 Optimization":
                 
                 
                 # ✅ 保存到 JSON
-                filename = save_result_to_json(result, problem)
+                filename = save_result_to_json(result, problem, target_lines)
                 
                 # ✅ 保存到 session_state（用于页面间传递）
                 st.session_state['optimization_result'] = {
@@ -301,7 +299,7 @@ elif page == "📊 Visualization":
         if data_source == "📁 本地文件":
             default_path = 'data/result.json'
             if os.path.exists(default_path):
-                X, F, data = load_result_from_json(default_path)
+                X, F, target_lines, data = load_result_from_json(default_path)
                 st.sidebar.success(f"✅ 已加载 `{default_path}`")
             else:
                 st.sidebar.error(f"❌ 找不到 `{default_path}`")
@@ -316,18 +314,28 @@ elif page == "📊 Visualization":
                     data = json.load(uploaded)
                     X = np.array(data['X'])
                     F = np.array(data['F'])
+                    target_lines = np.array(data['target_lines'])
                     st.sidebar.success("✅ 已加载上传的文件")
                     
                 else:
                     st.info("请上传 JSON 文件")
                     st.stop()
-        target_lines = np.array([[[168, -4], [221.67, 68.48]], [[193.5, -40.5], [260.1, 20.3]]])
+        #target_lines = np.array([[[168, -4], [221.67, 68.48]], [[193.5, -40.5], [260.1, 20.3]]])
         # 显示元数据
         if 'metadata' in data:
             st.sidebar.divider()
             st.sidebar.header("📋 元数据")
             for key, value in data['metadata'].items():
                 st.sidebar.write(f"**{key}:** {value}")
+
+        st.sidebar.divider()
+    
+        #显示目标线点
+        #将array转换成pandas
+        st.sidebar.write("🌀 Target Lines")
+        target_lines_xy = target_lines.reshape(target_lines.shape[0], -1)
+        target_lines_df = pd.DataFrame(target_lines_xy, columns=["x1", "y1", "x2", "y2"])
+        st.sidebar.dataframe(target_lines_df, width="content")
     
     # ============================================================
     # 上下布局

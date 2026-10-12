@@ -202,26 +202,26 @@ class LegRestOptimizationProblem(ElementwiseProblem):
         核心思想：先确定 P4（枢纽），再向四周扩展
         """
         # 定义搜索空间
-        X_MIN, X_MAX = 0, 70
-        Y_MIN, Y_MAX = 0, 240
+        X_MIN, X_MAX = 0, self.area_size[0]
+        Y_MIN, Y_MAX = 0, self.area_size[1]
         
         # ============================================================
         # Step 1: 确定 P4（枢纽点）—— 整个机构的骨架
         # ============================================================
-        # P4 应该位于空间的中间偏右区域
-        x4 = np.random.uniform(10, 60)
-        y4 = np.random.uniform(40, 200)
+        # P4 应该位于空间的中间区域
+        x4 = np.random.uniform(10, X_MAX-10)
+        y4 = np.random.uniform(10, Y_MAX-10)
         
         # ============================================================
         # Step 2: 确定 P1（固定点，在 P4 的左下方）
         # ============================================================
         # 约束: x1 < x4, y1 < y4
-        x1_min = X_MIN + 20
-        x1_max = x4 - 5
+        x1_min = X_MIN
+        x1_max = x4
         x1 = np.random.uniform(x1_min, x1_max)
         
-        y1_min = Y_MIN + 5
-        y1_max = y4 - 5
+        y1_min = Y_MIN
+        y1_max = y4
         y1 = np.random.uniform(y1_min, y1_max)
         
         # ============================================================
@@ -229,13 +229,13 @@ class LegRestOptimizationProblem(ElementwiseProblem):
         # ============================================================
         # 约束: y3 > y4, 且 x3 需要满足 x2 < x3 < x4
         # 这里先确定 y3 和 x3 的范围
-        y3_min = y4 + 5
-        y3_max = Y_MAX - 5
+        y3_min = y4
+        y3_max = Y_MAX
         y3 = np.random.uniform(y3_min, y3_max)
         
         # x3 在 x2 和 x4 之间，但 x2 还没确定，先给一个合理范围
-        x3_min = X_MIN + 20
-        x3_max = x4 - 5
+        x3_min = X_MIN
+        x3_max = x4
         x3 = np.random.uniform(x3_min, x3_max)
         
         # ============================================================
@@ -243,36 +243,36 @@ class LegRestOptimizationProblem(ElementwiseProblem):
         # ============================================================
         # 约束: x2 < x1, y1 < y2 < y3
         # 同时 x2 < x3
-        x2_min = X_MIN + 5
-        x2_max = min(x1 - 5, x3 - 5)
+        x2_min = X_MIN
+        x2_max = min(x1, x3)
         x2 = np.random.uniform(x2_min, x2_max)
         
-        y2_min = y1 + 5
-        y2_max = y3 - 5
+        y2_min = y1
+        y2_max = y3
         y2 = np.random.uniform(y2_min, y2_max)
         
         # ============================================================
         # Step 6: 确定 P6（顶部右侧）
         # ============================================================
         # 约束: x4 < x6 < x7, 且 y6 > y2, y6 > y4, y6 > y7
-        x6_min = x4 + 5
-        x6_max = X_MAX - 20
+        x6_min = x4
+        x6_max = X_MAX
         x6 = np.random.uniform(x6_min, x6_max)
         
-        y6_min = y4 + 5
-        y6_max = Y_MAX - 5
+        y6_min = y4
+        y6_max = Y_MAX
         y6 = np.random.uniform(y6_min, y6_max)
         
         # ============================================================
         # Step 7: 确定 P5（末端，最低层）
         # ============================================================
         # 约束: x3 < x4 < x5 < x7, 且 y5 < y2, y5 < y4, y5 < y7
-        x5_min = x4 + 5
-        x5_max = X_MAX - 20
+        x5_min = x4
+        x5_max = X_MAX
         x5 = np.random.uniform(x5_min, x5_max)
         
-        y5_min = Y_MIN + 5
-        y5_max = y4 - 5
+        y5_min = Y_MIN
+        y5_max = y4
         y5 = np.random.uniform(y5_min, y5_max)
 
         # ============================================================
@@ -280,12 +280,12 @@ class LegRestOptimizationProblem(ElementwiseProblem):
         # ============================================================
         # 约束: x4 < x6 < x7, 且 y1 < y7 < y3
         # 同时 y7 < y6
-        x7_min = max(x4, x5) + 5
-        x7_max = X_MAX - 5
+        x7_min = max(x4, x5) 
+        x7_max = X_MAX 
         x7 = np.random.uniform(x7_min, x7_max)
         
-        y7_min = y4 + 5
-        y7_max = y6 - 5
+        y7_min = y4
+        y7_max = y6 
         y7 = np.random.uniform(y7_min, y7_max)
         
         # ============================================================
@@ -308,7 +308,7 @@ class LegRestOptimizationProblem(ElementwiseProblem):
 
     def _validate_points(self, points: np.ndarray) -> bool:
         """
-        验证点是否满足所有几何约束
+        验证点是否满足所有几何约束, 两点之间是否大于预定值
         
         参数:
         points: 7x2的坐标数组，每行代表一个点
@@ -364,6 +364,13 @@ class LegRestOptimizationProblem(ElementwiseProblem):
         # y7 < y6
         if not (y[6] < y[5]):
             return False
+
+        n = len(points)
+        for i in range(n):
+            for j in range(i + 1, n):
+                dist = np.linalg.norm(points[i] - points[j])
+                if dist < self.min_distance:
+                    return False
         
         return True
 
@@ -420,6 +427,7 @@ def optimize_legrest(legrest_problem, initial_pop, pop_size=100, n_gen=200, seed
     """
     print("="*50)
     print("使用NSGAII进行优化求解")
+    print(f"NSGA info: poplution_size: {pop_size}; generation: {n_gen}; random_seed: {seed}.")
     print("="*50)
     
     # 2. 配置NSGA-II算法
