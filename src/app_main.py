@@ -238,6 +238,11 @@ if page == "🚀 Optimization":
             
             # 显示帕累托前沿
             fig = create_pareto_chart(F)
+            fig.update_layout(
+                    dragmode='pan',
+                    paper_bgcolor='rgba(0,0,0,0)',   # 整个图表的背景（含标题、图例区域）
+                    plot_bgcolor='rgba(0,0,0,0)'     # 绘图区（坐标轴内部）的背景
+                )
             st.plotly_chart(fig, width='stretch')
             
             # 统计信息
@@ -329,7 +334,7 @@ elif page == "📊 Visualization":
                 st.sidebar.write(f"**{key}:** {value}")
 
         st.sidebar.divider()
-    
+
         #显示目标线点
         #将array转换成pandas
         st.sidebar.write("🌀 Target Lines")
@@ -348,6 +353,12 @@ elif page == "📊 Visualization":
     
     # 创建帕累托图
     fig_pareto = create_pareto_chart(F)
+    fig_pareto.update_layout(
+        dragmode='pan',
+        paper_bgcolor='rgba(0,0,0,0)',   # 整个图表的背景（含标题、图例区域）
+        plot_bgcolor='rgba(0,0,0,0)'     # 绘图区（坐标轴内部）的背景
+    )
+        
     
     # ✅ 捕获点击事件
     event = st.plotly_chart(
@@ -394,6 +405,11 @@ elif page == "📊 Visualization":
             target_lines = target_lines,
             angle_range=(np.pi/2 - mechanism.link_angles[3], np.pi/2),
     )
+
+    fig_anim.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',   # 整个图表的背景（含标题、图例区域）
+            plot_bgcolor='rgba(0,0,0,0)'     # 绘图区（坐标轴内部）的背景
+        )
     
     st.plotly_chart(fig_anim, width='stretch')
     

@@ -140,6 +140,7 @@ def create_mechanism_animation(mechanism, target_lines, angle_range=(0, np.pi/2)
         frames=frames,
         layout=go.Layout(
             #title=dict(text='Legrest kinematic animation', font=dict(size=20), x=0.4, y = 1.0),
+            
             shapes=target_shapes,
             xaxis=dict(
                 title='X (mm)',
@@ -222,5 +223,6 @@ def create_mechanism_animation(mechanism, target_lines, angle_range=(0, np.pi/2)
             ],
         ),
     )
+    
     
     return fig

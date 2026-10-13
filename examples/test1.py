@@ -1,17 +1,16 @@
+import plotly.express as px
 import streamlit as st
 
-st.title("Hello Streamlit-er 👋")
-st.markdown(
-    """ 
-    This is a playground for you to try Streamlit and have fun. 
-
-    **There's :rainbow[so much] you can build!**
-    
-    We prepared a few examples for you to get started. Just 
-    click on the buttons above and discover what you can do 
-    with Streamlit. 
-    """
+df = px.data.iris()
+fig = px.scatter(
+    df,
+    x="sepal_width",
+    y="sepal_length",
+    color="species",
+    size="petal_length",
+    hover_data=["petal_width"],
 )
 
-if st.button("Send balloons!"):
-    st.balloons()
+event = st.plotly_chart(fig, key="iris", on_select="rerun")
+
+event.selection
